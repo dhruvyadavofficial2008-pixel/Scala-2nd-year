@@ -1,0 +1,46 @@
+import breeze.linalg._
+import breeze.plot._
+import com.github.tototoshi.csv._
+import java.io.File
+
+object pra13 {
+
+  def main(args: Array[String]): Unit = {
+
+    val reader = CSVReader.open(new File("cancer.csv"))
+    val data = reader.allWithHeaders()
+    reader.close()
+
+    // Extract Age and Plasma CA19-9 values
+    val validRows = data.filter(row =>
+      row("age").nonEmpty && row("plasma_CA19_9").nonEmpty
+    )
+
+    val age = DenseVector(
+      validRows.map(_("age").toDouble).toArray
+    )
+
+    val ca199 = DenseVector(
+      validRows.map(_("plasma_CA19_9").toDouble).toArray
+    )
+
+    // Create Figure
+    val fig = Figure()
+    val plt = fig.subplot(0)
+
+    plt.title = "Age vs Plasma CA19-9"
+    plt.xlabel = "Age (Years)"
+    plt.ylabel = "Plasma CA19-9"
+
+    // Scatter Plot (Blue Points)
+    plt += plot(
+      age,
+      ca199,
+      '.',
+      name = "Patients",
+      colorcode = "blue"
+    )
+
+    fig.refresh()
+  }
+}
