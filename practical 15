@@ -1,0 +1,46 @@
+import breeze.linalg._
+import breeze.plot._
+import com.github.tototoshi.csv._
+import java.io.File
+
+object pra15 {
+
+  def main(args: Array[String]): Unit = {
+
+    val reader = CSVReader.open(new File("cancer.csv"))
+    val data = reader.allWithHeaders()
+    reader.close()
+
+    // Keep only rows with valid plasma_CA19_9 values
+    val validData = data.filter(row =>
+      row("plasma_CA19_9").nonEmpty
+    )
+
+    // X-axis: Sample Number
+    val x = DenseVector(
+      (1 to validData.length).map(_.toDouble).toArray
+    )
+
+    // Y-axis: Plasma CA19-9
+    val y = DenseVector(
+      validData.map(_("plasma_CA19_9").toDouble).toArray
+    )
+
+    // Create Line Plot
+    val fig = Figure("Cancer Dataset Line Plot")
+    val plt = fig.subplot(0)
+
+    plt += plot(
+      x,
+      y,
+      name = "Plasma CA19-9",
+      colorcode = "blue"
+    )
+
+    plt.xlabel = "Sample Number"
+    plt.ylabel = "Plasma CA19-9"
+    plt.title = "Plasma CA19-9 Values"
+
+    fig.refresh()
+  }
+}
