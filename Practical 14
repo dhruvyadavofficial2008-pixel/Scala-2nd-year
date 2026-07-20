@@ -1,0 +1,41 @@
+import breeze.linalg._
+import breeze.plot._
+import com.github.tototoshi.csv._
+import java.io.File
+
+object pra14 {
+
+  def main(args: Array[String]): Unit = {
+
+    val reader = CSVReader.open(new File("cancer.csv"))
+    val data = reader.allWithHeaders()
+    reader.close()
+
+    // Extract Age values
+    val age = DenseVector(
+      data
+        .filter(_("age").nonEmpty)
+        .map(_("age").toDouble)
+        .toArray
+    )
+
+    // Create Figure
+    val fig = Figure("Histogram of Age")
+
+    // Different bin sizes
+    val binSizes = List(5, 10, 20)
+
+    for ((bins, idx) <- binSizes.zipWithIndex) {
+
+      val plt = fig.subplot(1, binSizes.length, idx)
+
+      plt += hist(age, bins)
+
+      plt.title = s"Histogram with $bins bins"
+      plt.xlabel = "Age (Years)"
+      plt.ylabel = "Frequency"
+    }
+
+    fig.refresh()
+  }
+}
