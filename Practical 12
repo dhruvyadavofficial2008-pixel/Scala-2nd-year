@@ -1,0 +1,47 @@
+import com.github.tototoshi.csv._
+import java.io.File
+
+object pra12 {
+
+  def main(args: Array[String]): Unit = {
+
+    val reader = CSVReader.open(new File("cancer.csv"))
+    val data = reader.allWithHeaders()
+    reader.close()
+
+    // Get unique diagnosis categories
+    val categories = data.map(_("diagnosis")).distinct.sorted
+
+    val newData = data.map { row =>
+      val diagnosis = row("diagnosis")
+
+      val oneHot = categories.map { cat =>
+        cat -> (if (cat == diagnosis) "1" else "0")
+      }.toMap
+
+      (row - "diagnosis") ++ oneHot
+    }
+
+    // Header
+    val headers = newData.head.keys.toList
+
+    println(headers.mkString(", "))
+
+    // Print encoded data
+    newData.foreach { row =>
+      println(headers.map(row).mkString(", "))
+    }
+
+    // Write to CSV
+    val writer = CSVWriter.open(new File("cancer_encoded.csv"))
+    writer.writeRow(headers)
+
+    newData.foreach { row =>
+      writer.writeRow(headers.map(row))
+    }
+
+    writer.close()
+
+    println("One-hot encoded file written to cancer_encoded.csv")
+  }
+}
